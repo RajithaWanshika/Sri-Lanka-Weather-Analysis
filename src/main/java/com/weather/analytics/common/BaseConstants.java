@@ -7,7 +7,7 @@ public abstract class BaseConstants {
   }
 
   public static final int DATE_INDEX = 1;
-  public static final int PRECIPITATION_SUM_INDEX = 11;
+  public static final int PRECIPITATION_SUM_INDEX = 13;
 
   public static final String CSV_DELIMITER = ",";
   public static final String DATE_DELIMITER_SLASH = "/";

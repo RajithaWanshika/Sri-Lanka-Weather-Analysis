@@ -31,7 +31,7 @@ public class WeatherReducer extends BaseReducer<Text, WeatherWritable, Text, Tex
     String monthName = getMonthName(month);
 
     String json = String.format(
-      "{\"district\":\"%s\",\"month\":%d,\"monthName\":\"%s\",\"totalPrecipitation\":%.2f,\"meanTemperature\":%.2f,\"recordCount\":%d,\"summary\":\"%s had a total precipitation of %.2f mm with a mean temperature of %.2f°C for %s month\"}",
+      "{\"district\":\"%s\",\"month\":%d,\"monthName\":\"%s\",\"totalPrecipitation\":%.2f,\"meanTemperature\":%.2f,\"recordCount\":%d,\"summary\":\"%s had a total precipitation of %.2f hours with a mean temperature of %.2f°C for %s month\"}",
       district, month, monthName,
       aggregatedResult.getTotalPrecipitation(),
       aggregatedResult.getMeanTemperature(),

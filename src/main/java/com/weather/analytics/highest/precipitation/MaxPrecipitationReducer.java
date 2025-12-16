@@ -36,7 +36,7 @@ public class MaxPrecipitationReducer extends BaseReducer<Text, DoubleWritable, T
     String monthName = getMonthName(month);
 
     String json = String.format(
-      "{\"year\":%d,\"month\":%d,\"monthName\":\"%s\",\"totalPrecipitation\":%.2f}",
+      "{\"year\":%d,\"month\":%d,\"monthName\":\"%s\",\"totalPrecipitation\":%.2f hours}",
       year, month, monthName, totalPrecipitation
     );
 
@@ -55,11 +55,11 @@ public class MaxPrecipitationReducer extends BaseReducer<Text, DoubleWritable, T
   protected void cleanup(Context context) throws IOException, InterruptedException {
     if (maxPrecipitation.getTotalPrecipitation() > 0) {
       String monthOrdinal = getMonthOrdinal(maxPrecipitation.getMonth());
-      String summary = String.format("%s month in %d had the highest total precipitation of %.2f mm",
+      String summary = String.format("%s month in %d had the highest total precipitation of %.2f hours",
         monthOrdinal, maxPrecipitation.getYear(), maxPrecipitation.getTotalPrecipitation());
 
       String json = String.format(
-        "{\"year\":%d,\"month\":%d,\"monthName\":\"%s\",\"totalPrecipitation\":%.2f,\"summary\":\"%s\"}",
+        "{\"year\":%d,\"month\":%d,\"monthName\":\"%s\",\"totalPrecipitation\":%.2f hours,\"summary\":\"%s\"}",
         maxPrecipitation.getYear(), 
         maxPrecipitation.getMonth(), 
         getMonthName(maxPrecipitation.getMonth()), 
