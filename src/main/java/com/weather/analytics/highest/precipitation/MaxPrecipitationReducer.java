@@ -24,28 +24,27 @@ public class MaxPrecipitationReducer extends BaseReducer<Text, DoubleWritable, T
 
   @Override
   public void reduce(Text key, Iterable<DoubleWritable> values, Context context) throws IOException, InterruptedException {
-  
+
     double totalPrecipitation = StreamSupport.stream(values.spliterator(), false)
       .mapToDouble(DoubleWritable::get)
       .sum();
-    
+
     String[] keyParts = key.toString().split("\\|");
     int year = keyParts.length > 0 ? Integer.parseInt(keyParts[0]) : 0;
     int month = keyParts.length > 1 ? Integer.parseInt(keyParts[1]) : 0;
-    
+
     String monthName = getMonthName(month);
-    
+
     String json = String.format(
       "{\"year\":%d,\"month\":%d,\"monthName\":\"%s\",\"totalPrecipitation\":%.2f}",
       year, month, monthName, totalPrecipitation
     );
-    
+
     Text outputValue = getOutputValue();
     outputValue.set(json);
     context.write(key, outputValue);
-    
+
     if (totalPrecipitation > maxPrecipitation.getTotalPrecipitation()) {
-      maxPrecipitation.addPrecipitation(totalPrecipitation);
       maxPrecipitation.setYear(year);
       maxPrecipitation.setMonth(month);
       maxPrecipitation.setTotalPrecipitation(totalPrecipitation);
@@ -54,9 +53,23 @@ public class MaxPrecipitationReducer extends BaseReducer<Text, DoubleWritable, T
   
   @Override
   protected void cleanup(Context context) throws IOException, InterruptedException {
-    Text outputValue = getOutputValue();
-    outputValue.set(String.format("{\"year\":%d,\"month\":%d,\"monthName\":\"%s\",\"totalPrecipitation\":%.2f}",
-      maxPrecipitation.getYear(), maxPrecipitation.getMonth(), getMonthName(maxPrecipitation.getMonth()), maxPrecipitation.getTotalPrecipitation()));
-    context.write(new Text("HIGHEST"), outputValue);
+    if (maxPrecipitation.getTotalPrecipitation() > 0) {
+      String monthOrdinal = getMonthOrdinal(maxPrecipitation.getMonth());
+      String summary = String.format("%s month in %d had the highest total precipitation of %.2f mm",
+        monthOrdinal, maxPrecipitation.getYear(), maxPrecipitation.getTotalPrecipitation());
+
+      String json = String.format(
+        "{\"year\":%d,\"month\":%d,\"monthName\":\"%s\",\"totalPrecipitation\":%.2f,\"summary\":\"%s\"}",
+        maxPrecipitation.getYear(), 
+        maxPrecipitation.getMonth(), 
+        getMonthName(maxPrecipitation.getMonth()), 
+        maxPrecipitation.getTotalPrecipitation(),
+        summary
+      );
+
+      Text outputValue = getOutputValue();
+      outputValue.set(json);
+      context.write(new Text("HIGHEST"), outputValue);
+    }
   }
 }

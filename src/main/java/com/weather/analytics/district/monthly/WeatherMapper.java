@@ -123,7 +123,7 @@ public class WeatherMapper extends Mapper<LongWritable, Text, Text, WeatherWrita
       String date = fields[WeatherConstants.DATE_INDEX].trim();
       double temperatureMean = Double.parseDouble(fields[WeatherConstants.TEMPERATURE_MEAN_INDEX].trim());
       double precipitationSum = Double.parseDouble(fields[WeatherConstants.PRECIPITATION_SUM_INDEX].trim());
-      
+
       DateComponents dateComponents = DateParser.parseDate(date);
       if (dateComponents == null) {
         return null;
@@ -147,12 +147,10 @@ public class WeatherMapper extends Mapper<LongWritable, Text, Text, WeatherWrita
     }
   }
 
-
   private String buildCompositeKey(WeatherRecord record) {
     return String.join(
       WeatherConstants.COMPOSITE_KEY_DELIMITER,
       record.getDistrict(),
-      String.valueOf(record.getYear()),
       String.valueOf(record.getMonth())
     );
   }

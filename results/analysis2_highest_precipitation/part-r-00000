@@ -172,4 +172,4 @@
 2024|4	{"year":2024,"month":4,"monthName":"April","totalPrecipitation":3037.30}
 2024|5	{"year":2024,"month":5,"monthName":"May","totalPrecipitation":10017.00}
 2024|6	{"year":2024,"month":6,"monthName":"June","totalPrecipitation":1433.70}
-HIGHEST	{"year":2014,"month":12,"monthName":"December","totalPrecipitation":14364.90}
+HIGHEST	{"year":2014,"month":12,"monthName":"December","totalPrecipitation":14364.90,"summary":"12th month in 2014 had the highest total precipitation of 14364.90 mm"}

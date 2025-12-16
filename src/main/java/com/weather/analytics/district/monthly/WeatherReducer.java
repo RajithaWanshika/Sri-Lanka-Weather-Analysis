@@ -22,26 +22,24 @@ public class WeatherReducer extends BaseReducer<Text, WeatherWritable, Text, Tex
   @Override
   protected void reduce(Text key, Iterable<WeatherWritable> values, Context context) throws IOException, InterruptedException {
     WeatherWritable aggregatedResult = aggregateWeatherData(values);
-    
+
     String[] keyParts = key.toString().split("\\|");
     String district = keyParts.length > 0 ? keyParts[0] : "Unknown";
-    int year = keyParts.length > 1 ? Integer.parseInt(keyParts[1]) : 0;
-    int month = keyParts.length > 2 ? Integer.parseInt(keyParts[2]) : 0;
-    
+    int month = keyParts.length > 1 ? Integer.parseInt(keyParts[1]) : 0;
+
     String monthOrdinal = getMonthOrdinal(month);
     String monthName = getMonthName(month);
-    
+
     String json = String.format(
-      "{\"district\":\"%s\",\"year\":%d,\"month\":%d,\"monthName\":\"%s\",\"totalPrecipitation\":%.2f,\"meanTemperature\":%.2f,\"recordCount\":%d,\"summary\":\"%s had a total precipitation of %.2f mm with a mean temperature of %.2f°C for %s month in %d\"}",
-      district, year, month, monthName,
+      "{\"district\":\"%s\",\"month\":%d,\"monthName\":\"%s\",\"totalPrecipitation\":%.2f,\"meanTemperature\":%.2f,\"recordCount\":%d,\"summary\":\"%s had a total precipitation of %.2f mm with a mean temperature of %.2f°C for %s month\"}",
+      district, month, monthName,
       aggregatedResult.getTotalPrecipitation(),
       aggregatedResult.getMeanTemperature(),
       aggregatedResult.getRecordCount(),
       district,
       aggregatedResult.getTotalPrecipitation(),
       aggregatedResult.getMeanTemperature(),
-      monthOrdinal,
-      year
+      monthOrdinal
     );
 
     Text outputValue = getOutputValue();
