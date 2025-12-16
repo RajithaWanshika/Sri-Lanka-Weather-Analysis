@@ -6,6 +6,9 @@ import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
 import java.io.IOException;
 
+import com.weather.analytics.common.DateParser;
+import com.weather.analytics.common.DateParser.DateComponents;
+
 public class MaxPrecipitationMapper extends Mapper<LongWritable, Text, Text, DoubleWritable> {
 
   private static final Text OUTPUT_KEY = new Text();
@@ -35,14 +38,20 @@ public class MaxPrecipitationMapper extends Mapper<LongWritable, Text, Text, Dou
         fields[MaxPrecipitationConstants.PRECIPITATION_SUM_INDEX].trim()
       );
 
-      String compositeKey = extractYearMonthKey(date);
-      if (compositeKey == null) {
+      DateComponents dateComponents = DateParser.parseDate(date);
+      if (dateComponents == null) {
         context.getCounter(
           MaxPrecipitationConstants.COUNTER_GROUP, 
           MaxPrecipitationConstants.MALFORMED_RECORDS_COUNTER
         ).increment(1);
         return;
       }
+
+      String compositeKey = String.join(
+        MaxPrecipitationConstants.COMPOSITE_KEY_DELIMITER,
+        String.valueOf(dateComponents.getYear()),
+        String.valueOf(dateComponents.getMonth())
+      );
 
       OUTPUT_KEY.set(compositeKey);
       OUTPUT_VALUE.set(precipitationSum);
@@ -57,28 +66,4 @@ public class MaxPrecipitationMapper extends Mapper<LongWritable, Text, Text, Dou
     }
   }
 
-  private String extractYearMonthKey(String date) {
-    try {
-      if (date.contains("/")) {
-        String[] dateParts = date.split(MaxPrecipitationConstants.DATE_DELIMITER_SLASH);
-        if (dateParts.length < 3) {
-          return null;
-        }
-        int year = Integer.parseInt(dateParts[MaxPrecipitationConstants.YEAR_INDEX_SLASH].trim());
-        int month = Integer.parseInt(dateParts[MaxPrecipitationConstants.MONTH_INDEX_SLASH].trim());
-        return year + MaxPrecipitationConstants.COMPOSITE_KEY_DELIMITER + month;
-      } else if (date.contains("-")) {
-        String[] dateParts = date.split(MaxPrecipitationConstants.DATE_DELIMITER_HYPHEN);
-        if (dateParts.length < 2) {
-          return null;
-        }
-        int year = Integer.parseInt(dateParts[MaxPrecipitationConstants.YEAR_INDEX_HYPHEN].trim());
-        int month = Integer.parseInt(dateParts[MaxPrecipitationConstants.MONTH_INDEX_HYPHEN].trim());
-        return year + MaxPrecipitationConstants.COMPOSITE_KEY_DELIMITER + month;
-      }
-      return null;
-    } catch (NumberFormatException | ArrayIndexOutOfBoundsException e) {
-      return null;
-    }
-  }
 }

@@ -15,6 +15,9 @@ import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
 
+import com.weather.analytics.common.DateParser;
+import com.weather.analytics.common.DateParser.DateComponents;
+
 public class WeatherMapper extends Mapper<LongWritable, Text, Text, WeatherWritable> {
   
   private static final Text OUTPUT_KEY = new Text();
@@ -121,7 +124,7 @@ public class WeatherMapper extends Mapper<LongWritable, Text, Text, WeatherWrita
       double temperatureMean = Double.parseDouble(fields[WeatherConstants.TEMPERATURE_MEAN_INDEX].trim());
       double precipitationSum = Double.parseDouble(fields[WeatherConstants.PRECIPITATION_SUM_INDEX].trim());
       
-      DateComponents dateComponents = parseDate(date);
+      DateComponents dateComponents = DateParser.parseDate(date);
       if (dateComponents == null) {
         return null;
       }
@@ -144,30 +147,6 @@ public class WeatherMapper extends Mapper<LongWritable, Text, Text, WeatherWrita
     }
   }
 
-  private DateComponents parseDate(String date) {
-    try {
-      if (date.contains("/")) {
-        String[] dateParts = date.split(WeatherConstants.DATE_DELIMITER_SLASH);
-        if (dateParts.length < 3) {
-          return null;
-        }
-        int year = Integer.parseInt(dateParts[WeatherConstants.YEAR_INDEX_SLASH].trim());
-        int month = Integer.parseInt(dateParts[WeatherConstants.MONTH_INDEX_SLASH].trim());
-        return new DateComponents(year, month);
-      } else if (date.contains("-")) {
-        String[] dateParts = date.split(WeatherConstants.DATE_DELIMITER);
-        if (dateParts.length < WeatherConstants.EXPECTED_DATE_PARTS) {
-          return null;
-        }
-        int year = Integer.parseInt(dateParts[WeatherConstants.YEAR_INDEX].trim());
-        int month = Integer.parseInt(dateParts[WeatherConstants.MONTH_INDEX].trim());
-        return new DateComponents(year, month);
-      }
-      return null;
-    } catch (NumberFormatException | ArrayIndexOutOfBoundsException e) {
-      return null;
-    }
-  }
 
   private String buildCompositeKey(WeatherRecord record) {
     return String.join(
@@ -221,16 +200,4 @@ public class WeatherMapper extends Mapper<LongWritable, Text, Text, WeatherWrita
     double getPrecipitationSum() { return precipitationSum; }
   }
 
-  private static class DateComponents {
-    private final int year;
-    private final int month;
-
-    DateComponents(int year, int month) {
-      this.year = year;
-      this.month = month;
-    }
-
-    int getYear() { return year; }
-    int getMonth() { return month; }
-  }
 } 
