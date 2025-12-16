@@ -8,6 +8,16 @@ PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 echo "Weather Analytics - Complete Workflow"
 echo ""
 
+echo "Step 0: Starting Docker containers..."
+bash scripts/spark_docker_setup.sh
+
+if [ $? -ne 0 ]; then
+    echo "ERROR: Docker containers failed to start"
+    exit 1
+fi
+
+echo ""
+
 cd "$PROJECT_ROOT"
 
 echo "Step 1: Building MapReduce JAR..."
@@ -44,7 +54,7 @@ fi
 
 echo ""
 echo "Step 5: Downloading results..."
-bash scripts/download_results.sh
+bash scripts/download_mapreduce_results.sh
 
 echo ""
 echo "Workflow completed successfully!"

@@ -20,7 +20,7 @@ echo "JAR copied to container"
 
 echo ""
 echo "Step 2: Running District Monthly Weather Analysis..."
-sudo docker exec -it namenode bash -c "
+sudo docker exec namenode bash -c "
     hadoop jar $CONTAINER_JAR_PATH \
     com.weather.analytics.district.monthly.WeatherDriver \
     /user/weather/input/weather/weatherData.csv \
@@ -33,7 +33,7 @@ if [ $? -eq 0 ]; then
     echo "District Monthly Analysis completed successfully!"
     echo ""
     echo "Viewing results:"
-    sudo docker exec -it namenode bash -c "hdfs dfs -cat /user/weather/output/analysis1_district_monthly/part-r-00000 | head -20"
+    sudo docker exec namenode bash -c "hdfs dfs -cat /user/weather/output/analysis1_district_monthly/part-r-00000 | head -20"
 else
     echo ""
     echo "ERROR: District Monthly Analysis failed"
@@ -42,7 +42,7 @@ fi
 
 echo ""
 echo "Step 3: Running Highest Precipitation Analysis..."
-sudo docker exec -it namenode bash -c "
+sudo docker exec namenode bash -c "
     hadoop jar $CONTAINER_JAR_PATH \
     com.weather.analytics.highest.precipitation.MaxPrecipitationDriver \
     /user/weather/input/weather/weatherData.csv \
@@ -54,7 +54,7 @@ if [ $? -eq 0 ]; then
     echo "Highest Precipitation Analysis completed successfully!"
     echo ""
     echo "Viewing results:"
-    sudo docker exec -it namenode bash -c "hdfs dfs -cat /user/weather/output/analysis2_highest_precipitation/part-r-00000 | head -20"
+    sudo docker exec namenode bash -c "hdfs dfs -cat /user/weather/output/analysis2_highest_precipitation/part-r-00000 | head -20"
     echo ""
     echo "To find the month/year with highest precipitation, check the output above."
 else
@@ -65,3 +65,6 @@ fi
 
 echo ""
 echo "All MapReduce jobs completed successfully!"
+echo ""
+echo "Step 4: Downloading MapReduce results to local results folder..."
+bash "$SCRIPT_DIR/download_mapreduce_results.sh"
