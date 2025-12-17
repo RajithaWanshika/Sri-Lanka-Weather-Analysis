@@ -1,0 +1,1789 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Weather Analytics Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #0728bc 0%, #4b65a2 100%);
+        padding: 20px;
+        color: #333;
+        min-height: 100vh;
+      }
+
+      .container {
+        max-width: 1600px;
+        margin: 0 auto;
+        width: 100%;
+      }
+
+      .header {
+        text-align: center;
+        color: white;
+        margin-bottom: 15px;
+        padding: 20px 30px;
+        background: rgba(255, 255, 255, 0.15);
+        backdrop-filter: blur(15px);
+        border-radius: 20px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+        flex-shrink: 0;
+      }
+
+      .header h1 {
+        font-size: 2em;
+        margin-bottom: 5px;
+        text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.3);
+        font-weight: 700;
+        color: white;
+      }
+
+      .header p {
+        font-size: 1em;
+        opacity: 0.95;
+        font-weight: 300;
+        color: white;
+      }
+
+      .summary-section {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 15px;
+        margin-bottom: 20px;
+      }
+
+      .summary-card {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border-radius: 15px;
+        padding: 20px;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        border-left: 5px solid;
+      }
+
+      .summary-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 12px 35px rgba(0, 0, 0, 0.2);
+      }
+
+      .summary-card.summary-1 {
+        border-left-color: #29df11;
+      }
+      .summary-card.summary-2 {
+        border-left-color: #11c8e4;
+      }
+      .summary-card.summary-3 {
+        border-left-color: #edda08;
+      }
+      .summary-card.summary-4 {
+        border-left-color: #f21b03;
+      }
+
+      .summary-card-title {
+        font-size: 0.9em;
+        color: #666;
+        margin-bottom: 10px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+
+      .summary-card-value {
+        font-size: 2em;
+        font-weight: 700;
+        color: #333;
+        margin-bottom: 5px;
+      }
+
+      .summary-card-label {
+        font-size: 0.85em;
+        color: #888;
+      }
+
+      .summary-card-icon {
+        font-size: 2.5em;
+        float: right;
+        opacity: 0.2;
+        margin-top: -10px;
+      }
+
+      .tabs {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 15px;
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        padding: 10px;
+        border-radius: 15px;
+        flex-wrap: wrap;
+        justify-content: center;
+        flex-shrink: 0;
+      }
+
+      .tab-button {
+        padding: 10px 20px;
+        background: rgba(255, 255, 255, 0.2);
+        border: 2px solid transparent;
+        border-radius: 10px;
+        color: white;
+        font-size: 0.95em;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        min-width: 180px;
+      }
+
+      .tab-button:hover {
+        background: rgba(255, 255, 255, 0.3);
+        transform: translateY(-2px);
+      }
+
+      .tab-button.active {
+        background: white;
+        color: #0d31d4;
+        border-color: white;
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+      }
+
+      .tab-content {
+        display: none;
+        animation: fadeIn 0.5s ease;
+      }
+
+      .tab-content.active {
+        display: block;
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .card {
+        background: white;
+        border-radius: 20px;
+        padding: 25px;
+        box-shadow: 0 15px 50px rgba(0, 0, 0, 0.25);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        margin-bottom: 15px;
+        flex-shrink: 0;
+      }
+
+      .card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+      }
+
+      .card-title {
+        font-size: 1.6em;
+        color: black;
+        margin-bottom: 15px;
+        padding-bottom: 15px;
+        border-bottom: 3px solid #0d31d4;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .card-title::before {
+        content: "";
+        width: 5px;
+        height: 40px;
+        background: linear-gradient(135deg, #0d31d4 0%, #4b65a2 100%);
+        border-radius: 3px;
+      }
+
+      .info-box {
+        background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+        padding: 15px;
+        border-radius: 12px;
+        margin-bottom: 15px;
+        border-left: 4px solid #0d31d4;
+        box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+      }
+
+      .info-box p {
+        margin: 3px 0;
+        color: #0d31d4;
+        font-size: 0.95em;
+        line-height: 1.5;
+      }
+
+      .chart-container {
+        position: relative;
+        height: 300px;
+        margin: 15px 0;
+        padding: 15px;
+        background: #f8f9fa;
+        border-radius: 12px;
+      }
+
+      .table-container {
+        overflow-x: auto;
+        margin-top: 15px;
+        border-radius: 12px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        background: white;
+      }
+
+      thead {
+        background: linear-gradient(135deg, #0d31d4 0%, #4b65a2 100%);
+        color: white;
+      }
+
+      th {
+        padding: 12px 15px;
+        text-align: left;
+        font-weight: 600;
+        font-size: 0.95em;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        position: sticky;
+        top: 0;
+        z-index: 10;
+      }
+
+      td {
+        padding: 10px 15px;
+        border-bottom: 1px solid #e0e0e0;
+        font-size: 0.9em;
+      }
+
+      tbody tr {
+        transition: all 0.2s ease;
+      }
+
+      tbody tr:hover {
+        background-color: #f5f5f5;
+        transform: scale(1.01);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      }
+
+      .stat-card {
+        background: linear-gradient(135deg, #0d31d4 0%, #4b65a2 100%);
+        color: white;
+        padding: 25px;
+        border-radius: 20px;
+        margin: 15px 0;
+        text-align: center;
+        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        transition: transform 0.3s ease;
+      }
+
+      .stat-card:hover {
+        transform: scale(1.05);
+      }
+
+      .stat-value {
+        font-size: 3em;
+        font-weight: 700;
+        margin: 15px 0;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+      }
+
+      .stat-label {
+        font-size: 1.2em;
+        opacity: 0.95;
+        font-weight: 500;
+      }
+
+      .season-badge {
+        display: inline-block;
+        padding: 8px 20px;
+        border-radius: 25px;
+        font-size: 0.95em;
+        font-weight: 600;
+        margin-left: 10px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+      }
+
+      .season-jan-mar {
+        background: #e3f2fd;
+        color: #1976d2;
+      }
+      .season-apr-jun {
+        background: #f1f8e9;
+        color: #558b2f;
+      }
+      .season-jul-sep {
+        background: #fff3e0;
+        color: #e65100;
+      }
+      .season-oct-dec {
+        background: #fce4ec;
+        color: #c2185b;
+      }
+
+      .district-list {
+        list-style: none;
+        padding: 0;
+      }
+
+      .district-list li {
+        padding: 12px;
+        margin: 8px 0;
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        border-radius: 12px;
+        border-left: 4px solid #0d31d4;
+        transition: all 0.3s ease;
+        box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+      }
+
+      .district-list li:hover {
+        background: linear-gradient(135deg, #e9ecef 0%, #dee2e6 100%);
+        transform: translateX(8px);
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
+      }
+
+      .district-name {
+        font-weight: 600;
+        color: #0d31d4;
+        font-size: 1.1em;
+      }
+
+      .district-value {
+        float: right;
+        font-weight: 700;
+        color: #333;
+        font-size: 1.15em;
+      }
+
+      .loading {
+        text-align: center;
+        padding: 50px;
+        color: white;
+        font-size: 1.5em;
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .error {
+        background: #ffebee;
+        color: #c62828;
+        padding: 20px;
+        border-radius: 15px;
+        border-left: 5px solid #c62828;
+        margin: 20px 0;
+      }
+
+      @media (max-width: 768px) {
+        body {
+          padding: 10px;
+        }
+
+        .tabs {
+          flex-direction: column;
+        }
+
+        .tab-button {
+          width: 100%;
+          min-width: auto;
+        }
+
+        .header {
+          padding: 15px;
+        }
+
+        .header h1 {
+          font-size: 1.5em;
+        }
+
+        .header p {
+          font-size: 0.9em;
+        }
+
+        .card {
+          padding: 15px;
+        }
+
+        .chart-container {
+          height: 250px;
+        }
+
+        .table-container {
+          max-height: 200px;
+        }
+
+        .district-list {
+          max-height: 200px;
+        }
+      }
+
+      .rank-badge {
+        display: inline-block;
+        width: 35px;
+        height: 35px;
+        line-height: 35px;
+        text-align: center;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #0d31d4 0%, #4b65a2 100%);
+        color: white;
+        font-weight: 700;
+        margin-right: 15px;
+        box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+      }
+
+      .view-toggle {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 20px;
+        justify-content: flex-end;
+        align-items: center;
+      }
+
+      .view-toggle-label {
+        font-weight: 600;
+        color: #0d31d4;
+        font-size: 0.95em;
+      }
+
+      .view-toggle-buttons {
+        display: flex;
+        background: #f5f5f5;
+        border-radius: 10px;
+        padding: 4px;
+        gap: 4px;
+      }
+
+      .view-toggle-btn {
+        padding: 8px 20px;
+        border: none;
+        border-radius: 8px;
+        background: transparent;
+        color: #666;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-size: 0.9em;
+      }
+
+      .view-toggle-btn:hover {
+        background: rgba(102, 126, 234, 0.1);
+        color: #0d31d4;
+      }
+
+      .view-toggle-btn.active {
+        background: linear-gradient(135deg, #0d31d4 0%, #4b65a2 100%);
+        color: white;
+        box-shadow: 0 3px 10px rgba(102, 126, 234, 0.3);
+      }
+
+      .chart-view,
+      .table-view {
+        display: none;
+      }
+
+      .chart-view.active,
+      .table-view.active {
+        display: block;
+      }
+
+      .temp-view {
+        display: none;
+      }
+
+      .temp-view.active {
+        display: block;
+      }
+
+      .extreme-view {
+        display: none;
+      }
+
+      .extreme-view.active {
+        display: block;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <h1>Weather Analytics Dashboard</h1>
+        <p>Analysis of Weather Patterns Across Sri Lanka</p>
+      </div>
+
+      <div class="summary-section" id="summarySection" style="display: none">
+        <div class="summary-card summary-1">
+          <div class="summary-card-icon">📊</div>
+          <div class="summary-card-title">Most Precipitous</div>
+          <div class="summary-card-value" id="summary1Value">-</div>
+          <div class="summary-card-label" id="summary1Label">
+            Districts analyzed
+          </div>
+        </div>
+        <div class="summary-card summary-2">
+          <div class="summary-card-icon">🌧️</div>
+          <div class="summary-card-title">Top District</div>
+          <div class="summary-card-value" id="summary2Value">-</div>
+          <div class="summary-card-label" id="summary2Label">
+            Total precipitation
+          </div>
+        </div>
+        <div class="summary-card summary-3">
+          <div class="summary-card-icon">🔥</div>
+          <div class="summary-card-title">Hot Months</div>
+          <div class="summary-card-value" id="summary3Value">-</div>
+          <div class="summary-card-label" id="summary3Label">
+            Districts with temp >25°C
+          </div>
+        </div>
+        <div class="summary-card summary-4">
+          <div class="summary-card-icon">🌪️</div>
+          <div class="summary-card-title">Extreme Events</div>
+          <div class="summary-card-value" id="summary4Value">-</div>
+          <div class="summary-card-label" id="summary4Label">
+            Total extreme weather days
+          </div>
+        </div>
+      </div>
+
+      <div class="tabs">
+        <button class="tab-button active" onclick="showTab(1)">
+          Most Precipitous Month/Season
+        </button>
+        <button class="tab-button" onclick="showTab(2)">
+          Top 5 Districts by Precipitation
+        </button>
+        <button class="tab-button" onclick="showTab(3)">
+          Month-wise Precipitation & Temperature
+        </button>
+        <button class="tab-button" onclick="showTab(4)">
+          Temperature Analysis
+        </button>
+        <button class="tab-button" onclick="showTab(5)">
+          Extreme Weather Events
+        </button>
+      </div>
+
+      <div id="loading" class="loading">
+        <p>Loading data from results folder...</p>
+      </div>
+
+      <div id="tab1" class="tab-content">
+        <div class="card">
+          <h2 class="card-title">Most Precipitous Month/Season by District</h2>
+          <div class="info-box">
+            <p>
+              <strong>Analysis:</strong> This visualization shows the most
+              precipitous month/season for each district across different
+              periods of the year
+            </p>
+          </div>
+          <div class="view-toggle">
+            <span class="view-toggle-label">View:</span>
+            <div class="view-toggle-buttons">
+              <button
+                class="view-toggle-btn active"
+                onclick="toggleView(1, 'chart', this)"
+              >
+                Graph
+              </button>
+              <button
+                class="view-toggle-btn"
+                onclick="toggleView(1, 'table', this)"
+              >
+                Table
+              </button>
+            </div>
+          </div>
+          <div id="view1-chart" class="chart-view active">
+            <div class="chart-container">
+              <canvas id="precipitousChart"></canvas>
+            </div>
+          </div>
+          <div id="view1-table" class="table-view">
+            <div class="table-container">
+              <table>
+                <thead>
+                  <tr>
+                    <th>District</th>
+                    <th>Month</th>
+                    <th>Season</th>
+                    <th>Precipitation (mm)</th>
+                  </tr>
+                </thead>
+                <tbody id="precipitousTable"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="tab2" class="tab-content">
+        <div class="card">
+          <h2 class="card-title">Top 5 Districts by Total Precipitation</h2>
+          <div class="info-box">
+            <p>
+              <strong>Analysis:</strong> This chart ranks the top 5 districts
+              based on the total amount of precipitation received across all
+              periods.
+            </p>
+          </div>
+          <div class="view-toggle">
+            <span class="view-toggle-label">View:</span>
+            <div class="view-toggle-buttons">
+              <button
+                class="view-toggle-btn active"
+                onclick="toggleView(2, 'chart', this)"
+              >
+                Graph
+              </button>
+              <button
+                class="view-toggle-btn"
+                onclick="toggleView(2, 'table', this)"
+              >
+                Table
+              </button>
+            </div>
+          </div>
+          <div id="view2-chart" class="chart-view active">
+            <div class="chart-container">
+              <canvas id="topPrecipitationChart"></canvas>
+            </div>
+          </div>
+          <div id="view2-table" class="table-view">
+            <ul class="district-list" id="topDistrictsList"></ul>
+          </div>
+        </div>
+      </div>
+
+      <div id="tab3" class="tab-content">
+        <div class="card">
+          <h2 class="card-title">
+            Month-wise Precipitation & Temperature by District
+          </h2>
+          <div class="info-box">
+            <p>
+              <strong>Analysis:</strong> This visualization shows monthly
+              precipitation and temperature data.
+            </p>
+          </div>
+          <div style="margin-bottom: 20px">
+            <label
+              for="districtSelect"
+              style="font-weight: 600; color: #0d31d4; margin-right: 10px"
+              >Select District:</label
+            >
+            <select
+              id="districtSelect"
+              style="
+                padding: 10px 20px;
+                border-radius: 8px;
+                border: 2px solid #0d31d4;
+                font-size: 1em;
+                min-width: 250px;
+              "
+              onchange="updateMonthlyChart()"
+            >
+              <option value="ALL">All Districts (Combined)</option>
+            </select>
+          </div>
+          <div class="view-toggle">
+            <span class="view-toggle-label">View:</span>
+            <div class="view-toggle-buttons">
+              <button
+                class="view-toggle-btn active"
+                onclick="toggleView(3, 'chart', this)"
+              >
+                Graph
+              </button>
+              <button
+                class="view-toggle-btn"
+                onclick="toggleView(3, 'table', this)"
+              >
+                Table
+              </button>
+            </div>
+          </div>
+          <div id="view3-chart" class="chart-view active">
+            <div class="chart-container">
+              <canvas id="monthlyChart"></canvas>
+            </div>
+          </div>
+          <div id="view3-table" class="table-view">
+            <div class="table-container">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Month</th>
+                    <th>Precipitation (mm)</th>
+                    <th>Temperature (°C)</th>
+                  </tr>
+                </thead>
+                <tbody id="monthlyTable"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="tab4" class="tab-content">
+        <div class="card">
+          <h2 class="card-title">Temperature Distribution Analysis</h2>
+          <div class="info-box">
+            <p>
+              <strong>Analysis:</strong> This shows temperature distribution
+              analysis with two views with mean temperature above 25°C in a
+              single year
+            </p>
+          </div>
+          <div class="view-toggle">
+            <span class="view-toggle-label">View Type:</span>
+            <div class="view-toggle-buttons">
+              <button
+                class="view-toggle-btn active"
+                onclick="toggleTempView('count', this)"
+              >
+                Count Analysis
+              </button>
+              <button
+                class="view-toggle-btn"
+                onclick="toggleTempView('district', this)"
+              >
+                District Temperatures
+              </button>
+            </div>
+          </div>
+          <div id="temp-count-view" class="temp-view active">
+            <div class="chart-container">
+              <canvas id="tempCountChart"></canvas>
+            </div>
+            <div class="info-box" style="margin-top: 20px">
+              <p>
+                <strong>Count Analysis:</strong> Shows the number of districts
+                that have mean temperature above 25°C in a single year.
+              </p>
+            </div>
+          </div>
+          <div id="temp-district-view" class="temp-view">
+            <div class="view-toggle" style="margin-top: 0">
+              <span class="view-toggle-label">Display:</span>
+              <div class="view-toggle-buttons">
+                <button
+                  class="view-toggle-btn active"
+                  onclick="toggleView(4, 'chart', this)"
+                >
+                  Graph
+                </button>
+                <button
+                  class="view-toggle-btn"
+                  onclick="toggleView(4, 'table', this)"
+                >
+                  Table
+                </button>
+              </div>
+            </div>
+            <div id="view4-chart" class="chart-view active">
+              <div class="chart-container">
+                <canvas id="tempChart"></canvas>
+              </div>
+            </div>
+            <div id="view4-table" class="table-view">
+              <div class="table-container">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>District</th>
+                      <th>% Months >25°C</th>
+                      <th>% Months <25°C</th>
+                      <th>% Months >30°C</th>
+                      <th>Avg Temp (°C)</th>
+                      <th>Min Temp (°C)</th>
+                      <th>Max Temp (°C)</th>
+                    </tr>
+                  </thead>
+                  <tbody id="tempTable"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="tab5" class="tab-content">
+        <div class="card">
+          <h2 class="card-title">Extreme Weather Events</h2>
+          <div class="info-box">
+            <p>
+              <strong>Analysis:</strong> This shows the total number of days
+              with extreme weather events by district and by year.
+            </p>
+          </div>
+          <div class="view-toggle">
+            <span class="view-toggle-label">View Type:</span>
+            <div class="view-toggle-buttons">
+              <button
+                class="view-toggle-btn active"
+                onclick="toggleExtremeView('district', this)"
+              >
+                📍 By District
+              </button>
+              <button
+                class="view-toggle-btn"
+                onclick="toggleExtremeView('year', this)"
+              >
+                📅 By Year
+              </button>
+            </div>
+          </div>
+          <div id="extreme-district-view" class="extreme-view active">
+            <div class="view-toggle" style="margin-top: 0">
+              <span class="view-toggle-label">Display:</span>
+              <div class="view-toggle-buttons">
+                <button
+                  class="view-toggle-btn active"
+                  onclick="toggleView(5, 'chart', this)"
+                >
+                  Graph
+                </button>
+                <button
+                  class="view-toggle-btn"
+                  onclick="toggleView(5, 'table', this)"
+                >
+                  Table
+                </button>
+              </div>
+            </div>
+            <div id="view5-chart" class="chart-view active">
+              <div class="chart-container">
+                <canvas id="extremeEventsChart"></canvas>
+              </div>
+            </div>
+            <div id="view5-table" class="table-view">
+              <ul class="district-list" id="extremeEventsList"></ul>
+            </div>
+          </div>
+          <div id="extreme-year-view" class="extreme-view">
+            <div class="view-toggle" style="margin-top: 0">
+              <span class="view-toggle-label">Display:</span>
+              <div class="view-toggle-buttons">
+                <button
+                  class="view-toggle-btn active"
+                  onclick="toggleView(6, 'chart', this)"
+                >
+                  Graph
+                </button>
+                <button
+                  class="view-toggle-btn"
+                  onclick="toggleView(6, 'table', this)"
+                >
+                  Table
+                </button>
+              </div>
+            </div>
+            <div id="view6-chart" class="chart-view active">
+              <div class="chart-container">
+                <canvas id="extremeEventsYearChart"></canvas>
+              </div>
+            </div>
+            <div id="view6-table" class="table-view">
+              <div class="table-container">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Year</th>
+                      <th>Extreme Weather Days</th>
+                    </tr>
+                  </thead>
+                  <tbody id="extremeEventsYearTable"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      let dashboardData = null;
+      let charts = {};
+
+      function showTab(tabNumber) {
+        document.querySelectorAll(".tab-content").forEach((tab) => {
+          tab.classList.remove("active");
+        });
+
+        document.querySelectorAll(".tab-button").forEach((btn) => {
+          btn.classList.remove("active");
+        });
+
+        const tabElement = document.getElementById(`tab${tabNumber}`);
+        if (tabElement) {
+          tabElement.classList.add("active");
+        }
+
+        const buttons = document.querySelectorAll(".tab-button");
+        if (buttons[tabNumber - 1]) {
+          buttons[tabNumber - 1].classList.add("active");
+        }
+
+        if (dashboardData) {
+          const chartKey = `chart${tabNumber}`;
+          if (!charts[chartKey] && tabNumber !== 3) {
+            initializeCharts();
+          } else if (tabNumber === 3 && charts.chart3) {
+            const selectedDistrict =
+              document.getElementById("districtSelect").value;
+            if (selectedDistrict) {
+              updateMonthlyChart();
+            }
+          }
+        }
+      }
+
+      function toggleView(tabNumber, viewType, buttonElement) {
+        const buttons = document.querySelectorAll(
+          `#tab${tabNumber} .view-toggle-btn`
+        );
+        buttons.forEach((btn) => btn.classList.remove("active"));
+        buttonElement.classList.add("active");
+
+        const chartView = document.getElementById(`view${tabNumber}-chart`);
+        const tableView = document.getElementById(`view${tabNumber}-table`);
+
+        if (viewType === "chart") {
+          chartView.classList.add("active");
+          tableView.classList.remove("active");
+        } else {
+          chartView.classList.remove("active");
+          tableView.classList.add("active");
+        }
+      }
+
+      function getSeasonClass(season) {
+        const classes = {
+          "Jan-Mar": "season-jan-mar",
+          "Apr-Jun": "season-apr-jun",
+          "Jul-Sep": "season-jul-sep",
+          "Oct-Dec": "season-oct-dec",
+        };
+        return classes[season] || "";
+      }
+
+      async function loadData() {
+        try {
+          if (window.location.protocol === "file:") {
+            throw new Error(
+              "Cannot load data from file:// protocol. Please use a local server."
+            );
+          }
+
+          const response = await fetch("results/dashboard_data.json", {
+            method: "GET",
+            headers: {
+              Accept: "application/json",
+            },
+            cache: "no-cache",
+          });
+
+          if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+          }
+
+          dashboardData = await response.json();
+
+          if (
+            !dashboardData.most_precipitous ||
+            !dashboardData.top_5_districts ||
+            !dashboardData.temp_analysis ||
+            !dashboardData.extreme_events ||
+            !dashboardData.monthly_precip_temp
+          ) {
+            throw new Error("Invalid data structure in dashboard_data.json");
+          }
+
+          document.getElementById("loading").style.display = "none";
+          updateSummaryCards();
+          document.getElementById("tab1").classList.add("active");
+          initializeCharts();
+        } catch (error) {
+          const loadingDiv = document.getElementById("loading");
+          const isFileProtocol = window.location.protocol === "file:";
+          const currentUrl = window.location.href;
+
+          loadingDiv.innerHTML = `
+  <div class="error">
+    <h3>⚠️ Error Loading Data</h3>
+    <p><strong>Issue:</strong> ${error.message}</p>
+    ${
+      isFileProtocol
+        ? `
+    <p style="color: #c62828; font-weight: bold; margin: 15px 0;">
+      ⚠️ You're opening the file directly (file://). This won't work due to browser security restrictions.
+    </p>
+    `
+        : ""
+    }
+    <p><strong>Current URL:</strong> <code>${currentUrl}</code></p>
+    <p><strong>Solution:</strong></p>
+    <ol style="text-align: left; max-width: 700px; margin: 20px auto; line-height: 1.8;">
+      <li>Open a terminal in the project directory</li>
+      <li>Run: <code style="background: #f5f5f5; padding: 5px 10px; border-radius: 5px;">python3 process_results_data.py</code></li>
+      <li>Start the server: <code style="background: #f5f5f5; padding: 5px 10px; border-radius: 5px;">python3 serve_dashboard.py</code></li>
+      <li>Open in browser: <code style="background: #f5f5f5; padding: 5px 10px; border-radius: 5px;">http://localhost:8000/dashboard.html</code></li>
+    </ol>
+    <p style="margin-top: 20px; color: #666;">
+      <strong>Note:</strong> The dashboard must be accessed through a web server (not by double-clicking the HTML file) 
+      because browsers block loading local JSON files for security reasons.
+    </p>
+  </div>
+  `;
+          console.error("Error loading data:", error);
+          console.error("Current protocol:", window.location.protocol);
+          console.error("Current URL:", window.location.href);
+        }
+      }
+
+      function initializeCharts() {
+        if (!dashboardData) return;
+
+        if (!charts.chart1) {
+          const precipitousData = Object.entries(dashboardData.most_precipitous)
+            .sort((a, b) => b[1].precipitation - a[1].precipitation)
+            .slice(0, 20);
+
+          charts.chart1 = new Chart(
+            document.getElementById("precipitousChart"),
+            {
+              type: "bar",
+              data: {
+                labels: precipitousData.map((d) => d[0]),
+                datasets: [
+                  {
+                    label: "Precipitation (mm)",
+                    data: precipitousData.map((d) => d[1].precipitation),
+                    backgroundColor: "rgba(102, 126, 234, 0.8)",
+                    borderColor: "rgba(102, 126, 234, 1)",
+                    borderWidth: 2,
+                    borderRadius: 8,
+                  },
+                ],
+              },
+              options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                  legend: { display: false },
+                  title: {
+                    display: true,
+                    text: "Highest Precipitation Month by District (Top 20)",
+                    font: { size: 16, weight: "bold" },
+                  },
+                },
+                scales: {
+                  y: {
+                    beginAtZero: true,
+                    title: {
+                      display: true,
+                      text: "Precipitation (mm)",
+                      font: { size: 14, weight: "bold" },
+                    },
+                    grid: { color: "rgba(0,0,0,0.1)" },
+                  },
+                  x: {
+                    grid: { display: false },
+                  },
+                },
+              },
+            }
+          );
+
+          const table = document.getElementById("precipitousTable");
+          Object.entries(dashboardData.most_precipitous)
+            .sort((a, b) => b[1].precipitation - a[1].precipitation)
+            .forEach(([district, data]) => {
+              const row = table.insertRow();
+              row.insertCell(0).textContent = district;
+              row.insertCell(1).textContent = data.month;
+              const seasonCell = row.insertCell(2);
+              seasonCell.innerHTML = `<span class="season-badge ${getSeasonClass(
+                data.season
+              )}">${data.season}</span>`;
+              row.insertCell(3).textContent =
+                data.precipitation.toLocaleString("en-US", {
+                  maximumFractionDigits: 2,
+                }) + " mm";
+            });
+        }
+
+        if (!charts.chart2) {
+          charts.chart2 = new Chart(
+            document.getElementById("topPrecipitationChart"),
+            {
+              type: "doughnut",
+              data: {
+                labels: dashboardData.top_5_districts.map((d) => d.district),
+                datasets: [
+                  {
+                    data: dashboardData.top_5_districts.map((d) => d.total),
+                    backgroundColor: [
+                      "rgba(102, 126, 234, 0.9)",
+                      "rgba(118, 75, 162, 0.9)",
+                      "rgba(255, 152, 0, 0.9)",
+                      "rgba(76, 175, 80, 0.9)",
+                      "rgba(233, 30, 99, 0.9)",
+                    ],
+                    borderWidth: 3,
+                    borderColor: "#fff",
+                  },
+                ],
+              },
+              options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                  legend: {
+                    position: "right",
+                    labels: { font: { size: 14, weight: "bold" }, padding: 20 },
+                  },
+                  title: {
+                    display: true,
+                    text: "Top 5 Districts by Total Precipitation",
+                    font: { size: 16, weight: "bold" },
+                  },
+                },
+              },
+            }
+          );
+
+          const list = document.getElementById("topDistrictsList");
+          dashboardData.top_5_districts.forEach((item, index) => {
+            const li = document.createElement("li");
+            li.innerHTML = `
+  <span class="rank-badge">${index + 1}</span>
+  <span class="district-name">${item.district}</span>
+  <span class="district-value">${item.total.toLocaleString("en-US", {
+    maximumFractionDigits: 2,
+  })} mm</span>
+  `;
+            list.appendChild(li);
+          });
+        }
+
+        if (!charts.chart3) {
+          const districtSelect = document.getElementById("districtSelect");
+          Object.keys(dashboardData.monthly_precip_temp)
+            .sort()
+            .forEach((district) => {
+              const option = document.createElement("option");
+              option.value = district;
+              option.textContent = district;
+              districtSelect.appendChild(option);
+            });
+
+          const allDistrictsData = aggregateAllDistrictsData();
+          charts.chart3 = new Chart(document.getElementById("monthlyChart"), {
+            type: "bar",
+            data: {
+              labels: allDistrictsData.months,
+              datasets: [
+                {
+                  label: "Precipitation (mm)",
+                  data: allDistrictsData.precip,
+                  backgroundColor: "rgba(102, 126, 234, 0.8)",
+                  borderColor: "rgba(102, 126, 234, 1)",
+                  borderWidth: 2,
+                  yAxisID: "y",
+                  borderRadius: 5,
+                },
+                {
+                  label: "Temperature (°C)",
+                  data: allDistrictsData.temp,
+                  type: "line",
+                  backgroundColor: "rgba(255, 152, 0, 0.2)",
+                  borderColor: "rgba(255, 152, 0, 1)",
+                  borderWidth: 3,
+                  fill: false,
+                  yAxisID: "y1",
+                  tension: 0.4,
+                  pointRadius: 5,
+                  pointHoverRadius: 7,
+                },
+              ],
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: {
+                legend: {
+                  display: true,
+                  labels: { font: { size: 14, weight: "bold" } },
+                },
+                title: {
+                  display: true,
+                  text: "Monthly Precipitation & Temperature: All Districts (Combined)",
+                  font: { size: 16, weight: "bold" },
+                },
+              },
+              scales: {
+                y: {
+                  type: "linear",
+                  display: true,
+                  position: "left",
+                  beginAtZero: true,
+                  title: {
+                    display: true,
+                    text: "Precipitation (mm)",
+                    font: { size: 14, weight: "bold" },
+                  },
+                  grid: { color: "rgba(0,0,0,0.1)" },
+                },
+                y1: {
+                  type: "linear",
+                  display: true,
+                  position: "right",
+                  title: {
+                    display: true,
+                    text: "Temperature (°C)",
+                    font: { size: 14, weight: "bold" },
+                  },
+                  grid: { drawOnChartArea: false },
+                },
+                x: {
+                  grid: { display: false },
+                },
+              },
+            },
+          });
+
+          updateMonthlyTable("ALL");
+        }
+
+        if (!charts.tempCountChart) {
+          const districtsAbove25 = Object.values(
+            dashboardData.temp_analysis
+          ).filter((data) => data.percentage_above_25 > 0).length;
+          const districtsBelow25 = Object.values(
+            dashboardData.temp_analysis
+          ).filter((data) => data.percentage_below_25 > 0).length;
+
+          charts.tempCountChart = new Chart(
+            document.getElementById("tempCountChart"),
+            {
+              type: "doughnut",
+              data: {
+                labels: [
+                  "Districts with Temp >25°C",
+                  "Districts with Temp <25°C",
+                ],
+                datasets: [
+                  {
+                    data: [districtsAbove25, districtsBelow25],
+                    backgroundColor: [
+                      "rgba(255, 152, 0, 0.9)",
+                      "rgba(33, 150, 243, 0.9)",
+                    ],
+                    borderWidth: 3,
+                    borderColor: "#fff",
+                  },
+                ],
+              },
+              options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                  legend: {
+                    position: "right",
+                    labels: { font: { size: 14, weight: "bold" }, padding: 20 },
+                  },
+                  title: {
+                    display: true,
+                    text: "Count of Districts: Temperature Above/Below 25°C",
+                    font: { size: 16, weight: "bold" },
+                  },
+                },
+              },
+            }
+          );
+        }
+
+        if (!charts.chart4) {
+          const tempData = Object.entries(dashboardData.temp_analysis).sort(
+            (a, b) => b[1].percentage_above_25 - a[1].percentage_above_25
+          );
+
+          charts.chart4 = new Chart(document.getElementById("tempChart"), {
+            type: "bar",
+            data: {
+              labels: tempData.map((d) => d[0]),
+              datasets: [
+                {
+                  label: "% Months >25°C",
+                  data: tempData.map((d) => d[1].percentage_above_25),
+                  backgroundColor: "rgba(255, 152, 0, 0.8)",
+                  borderColor: "rgba(255, 152, 0, 1)",
+                  borderWidth: 2,
+                  yAxisID: "y",
+                  borderRadius: 5,
+                },
+                {
+                  label: "% Months <25°C",
+                  data: tempData.map((d) => d[1].percentage_below_25),
+                  backgroundColor: "rgba(33, 150, 243, 0.8)",
+                  borderColor: "rgba(33, 150, 243, 1)",
+                  borderWidth: 2,
+                  yAxisID: "y",
+                  borderRadius: 5,
+                },
+                {
+                  label: "Avg Temperature (°C)",
+                  data: tempData.map((d) => d[1].avg_temperature),
+                  type: "line",
+                  backgroundColor: "rgba(76, 175, 80, 0.2)",
+                  borderColor: "rgba(76, 175, 80, 1)",
+                  borderWidth: 3,
+                  fill: false,
+                  yAxisID: "y1",
+                  tension: 0.4,
+                  pointRadius: 4,
+                  pointHoverRadius: 6,
+                },
+              ],
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: {
+                legend: {
+                  display: true,
+                  labels: { font: { size: 14, weight: "bold" } },
+                  position: "top",
+                },
+                title: {
+                  display: true,
+                  text: "Temperature Distribution by District: Percentage & Average Temperature",
+                  font: { size: 16, weight: "bold" },
+                },
+              },
+              scales: {
+                y: {
+                  type: "linear",
+                  display: true,
+                  position: "left",
+                  beginAtZero: true,
+                  max: 100,
+                  title: {
+                    display: true,
+                    text: "Percentage (%)",
+                    font: { size: 14, weight: "bold" },
+                  },
+                  grid: { color: "rgba(0,0,0,0.1)" },
+                },
+                y1: {
+                  type: "linear",
+                  display: true,
+                  position: "right",
+                  title: {
+                    display: true,
+                    text: "Temperature (°C)",
+                    font: { size: 14, weight: "bold" },
+                  },
+                  grid: { drawOnChartArea: false },
+                },
+                x: {
+                  grid: { display: false },
+                  ticks: {
+                    maxRotation: 45,
+                    minRotation: 45,
+                  },
+                },
+              },
+            },
+          });
+
+          const table = document.getElementById("tempTable");
+          Object.entries(dashboardData.temp_analysis)
+            .sort((a, b) => b[1].percentage_above_25 - a[1].percentage_above_25)
+            .forEach(([district, data]) => {
+              const row = table.insertRow();
+              row.insertCell(0).textContent = district;
+              row.insertCell(1).textContent =
+                data.percentage_above_25.toFixed(1) + "%";
+              row.insertCell(2).textContent =
+                data.percentage_below_25.toFixed(1) + "%";
+              row.insertCell(3).textContent =
+                data.percentage_above_30.toFixed(1) + "%";
+              row.insertCell(4).textContent = data.avg_temperature.toFixed(2);
+              row.insertCell(5).textContent = data.min_temperature.toFixed(2);
+              row.insertCell(6).textContent = data.max_temperature.toFixed(2);
+            });
+        }
+
+        if (!charts.chart5) {
+          const extremeData = Object.entries(dashboardData.extreme_events)
+            .sort((a, b) => b[1] - a[1])
+            .slice(0, 15);
+
+          charts.chart5 = new Chart(
+            document.getElementById("extremeEventsChart"),
+            {
+              type: "bar",
+              data: {
+                labels: extremeData.map((d) => d[0]),
+                datasets: [
+                  {
+                    label: "Extreme Weather Days",
+                    data: extremeData.map((d) => d[1]),
+                    backgroundColor: "rgba(233, 30, 99, 0.8)",
+                    borderColor: "rgba(233, 30, 99, 1)",
+                    borderWidth: 2,
+                    borderRadius: 8,
+                  },
+                ],
+              },
+              options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                  legend: { display: false },
+                  title: {
+                    display: true,
+                    text: "Total Days with Extreme Weather Events (Top 15)",
+                    font: { size: 16, weight: "bold" },
+                  },
+                },
+                scales: {
+                  y: {
+                    beginAtZero: true,
+                    title: {
+                      display: true,
+                      text: "Number of Days",
+                      font: { size: 14, weight: "bold" },
+                    },
+                    grid: { color: "rgba(0,0,0,0.1)" },
+                  },
+                  x: {
+                    grid: { display: false },
+                  },
+                },
+              },
+            }
+          );
+
+          const list = document.getElementById("extremeEventsList");
+          Object.entries(dashboardData.extreme_events)
+            .sort((a, b) => b[1] - a[1])
+            .slice(0, 15)
+            .forEach(([district, count], index) => {
+              const li = document.createElement("li");
+              li.innerHTML = `
+  <span class="rank-badge">${index + 1}</span>
+  <span class="district-name">${district}</span>
+  <span class="district-value">${count} days</span>
+  `;
+              list.appendChild(li);
+            });
+        }
+
+        if (
+          !charts.extremeEventsYearChart &&
+          dashboardData.extreme_events_by_year
+        ) {
+          const yearData = Object.entries(
+            dashboardData.extreme_events_by_year
+          ).sort((a, b) => a[0] - b[0]);
+
+          charts.extremeEventsYearChart = new Chart(
+            document.getElementById("extremeEventsYearChart"),
+            {
+              type: "line",
+              data: {
+                labels: yearData.map((d) => d[0]),
+                datasets: [
+                  {
+                    label: "Extreme Weather Days",
+                    data: yearData.map((d) => d[1]),
+                    backgroundColor: "rgba(233, 30, 99, 0.2)",
+                    borderColor: "rgba(233, 30, 99, 1)",
+                    borderWidth: 3,
+                    fill: true,
+                    tension: 0.4,
+                    pointRadius: 5,
+                    pointHoverRadius: 7,
+                  },
+                ],
+              },
+              options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                  legend: {
+                    display: true,
+                    labels: { font: { size: 14, weight: "bold" } },
+                  },
+                  title: {
+                    display: true,
+                    text: "Extreme Weather Events by Year",
+                    font: { size: 16, weight: "bold" },
+                  },
+                },
+                scales: {
+                  y: {
+                    beginAtZero: true,
+                    title: {
+                      display: true,
+                      text: "Number of Days",
+                      font: { size: 14, weight: "bold" },
+                    },
+                    grid: { color: "rgba(0,0,0,0.1)" },
+                  },
+                  x: {
+                    title: {
+                      display: true,
+                      text: "Year",
+                      font: { size: 14, weight: "bold" },
+                    },
+                    grid: { display: false },
+                  },
+                },
+              },
+            }
+          );
+
+          const yearTable = document.getElementById("extremeEventsYearTable");
+          yearData.forEach(([year, count]) => {
+            const row = yearTable.insertRow();
+            row.insertCell(0).textContent = year;
+            row.insertCell(1).textContent = count + " days";
+          });
+        }
+      }
+
+      function updateSummaryCards() {
+        if (!dashboardData) return;
+
+        const districtCount = Object.keys(
+          dashboardData.most_precipitous
+        ).length;
+        document.getElementById("summary1Value").textContent = districtCount;
+        document.getElementById("summary1Label").textContent =
+          "Districts analyzed";
+
+        if (
+          dashboardData.top_5_districts &&
+          dashboardData.top_5_districts.length > 0
+        ) {
+          const topDistrict = dashboardData.top_5_districts[0];
+          document.getElementById("summary2Value").textContent =
+            topDistrict.district;
+          document.getElementById(
+            "summary2Label"
+          ).textContent = `${topDistrict.total.toLocaleString("en-US", {
+            maximumFractionDigits: 0,
+          })} mm total`;
+        }
+
+        const hotDistricts = Object.values(dashboardData.temp_analysis).filter(
+          (data) => data.percentage_above_25 > 0
+        ).length;
+        document.getElementById("summary3Value").textContent = hotDistricts;
+        document.getElementById(
+          "summary3Label"
+        ).textContent = `Districts with months >25°C`;
+
+        const totalExtremeDays = Object.values(
+          dashboardData.extreme_events
+        ).reduce((sum, days) => sum + days, 0);
+        document.getElementById("summary4Value").textContent = totalExtremeDays;
+        document.getElementById("summary4Label").textContent =
+          "Total extreme weather days";
+
+        document.getElementById("summarySection").style.display = "grid";
+      }
+
+      function aggregateAllDistrictsData() {
+        const monthData = {};
+
+        Object.values(dashboardData.monthly_precip_temp).forEach(
+          (districtData) => {
+            districtData.forEach((month) => {
+              if (!monthData[month.month]) {
+                monthData[month.month] = {
+                  month_name: month.month_name,
+                  precip_sum: 0,
+                  temp_sum: 0,
+                  count: 0,
+                };
+              }
+              monthData[month.month].precip_sum += month.precipitation;
+              monthData[month.month].temp_sum += month.temperature;
+              monthData[month.month].count += 1;
+            });
+          }
+        );
+
+        const sortedMonths = Object.keys(monthData).sort(
+          (a, b) => parseInt(a) - parseInt(b)
+        );
+        return {
+          months: sortedMonths.map((m) => monthData[m].month_name),
+          precip: sortedMonths.map(
+            (m) =>
+              Math.round((monthData[m].precip_sum / monthData[m].count) * 100) /
+              100
+          ),
+          temp: sortedMonths.map(
+            (m) =>
+              Math.round((monthData[m].temp_sum / monthData[m].count) * 100) /
+              100
+          ),
+        };
+      }
+
+      function updateMonthlyChart() {
+        const district = document.getElementById("districtSelect").value;
+        let monthlyData, title;
+
+        if (district === "ALL" || !district) {
+          const aggregated = aggregateAllDistrictsData();
+          monthlyData = aggregated.months.map((month, idx) => ({
+            month_name: month,
+            precipitation: aggregated.precip[idx],
+            temperature: aggregated.temp[idx],
+          }));
+          title =
+            "Monthly Precipitation & Temperature: All Districts (Combined)";
+        } else {
+          if (!dashboardData || !dashboardData.monthly_precip_temp[district]) {
+            return;
+          }
+          monthlyData = dashboardData.monthly_precip_temp[district];
+          title = `Monthly Precipitation & Temperature: ${district}`;
+        }
+
+        const months = monthlyData.map((d) => d.month_name);
+        const precip = monthlyData.map((d) => d.precipitation);
+        const temp = monthlyData.map((d) => d.temperature);
+
+        if (charts.chart3) {
+          charts.chart3.data.labels = months;
+          charts.chart3.data.datasets = [
+            {
+              label: "Precipitation (mm)",
+              data: precip,
+              backgroundColor: "rgba(102, 126, 234, 0.8)",
+              borderColor: "rgba(102, 126, 234, 1)",
+              borderWidth: 2,
+              yAxisID: "y",
+              borderRadius: 5,
+            },
+            {
+              label: "Temperature (°C)",
+              data: temp,
+              type: "line",
+              backgroundColor: "rgba(255, 152, 0, 0.2)",
+              borderColor: "rgba(255, 152, 0, 1)",
+              borderWidth: 3,
+              fill: false,
+              yAxisID: "y1",
+              tension: 0.4,
+              pointRadius: 5,
+              pointHoverRadius: 7,
+            },
+          ];
+          charts.chart3.options.plugins.title.text = title;
+          charts.chart3.update();
+        }
+
+        updateMonthlyTable(district);
+      }
+
+      function updateMonthlyTable(district) {
+        const table = document.getElementById("monthlyTable");
+        table.innerHTML = "";
+
+        let monthlyData;
+        if (district === "ALL" || !district) {
+          const aggregated = aggregateAllDistrictsData();
+          monthlyData = aggregated.months.map((month, idx) => ({
+            month_name: month,
+            precipitation: aggregated.precip[idx],
+            temperature: aggregated.temp[idx],
+          }));
+        } else {
+          monthlyData = dashboardData.monthly_precip_temp[district];
+        }
+
+        monthlyData.forEach((data) => {
+          const row = table.insertRow();
+          row.insertCell(0).textContent = data.month_name;
+          row.insertCell(1).textContent =
+            data.precipitation.toLocaleString("en-US", {
+              maximumFractionDigits: 2,
+            }) + " mm";
+          row.insertCell(2).textContent = data.temperature.toFixed(2) + "°C";
+        });
+      }
+
+      function toggleTempView(viewType, buttonElement) {
+        const buttons = document.querySelectorAll(
+          "#tab4 .view-toggle-buttons:first-of-type .view-toggle-btn"
+        );
+        buttons.forEach((btn) => btn.classList.remove("active"));
+        buttonElement.classList.add("active");
+
+        const countView = document.getElementById("temp-count-view");
+        const districtView = document.getElementById("temp-district-view");
+
+        if (viewType === "count") {
+          countView.classList.add("active");
+          districtView.classList.remove("active");
+        } else {
+          countView.classList.remove("active");
+          districtView.classList.add("active");
+        }
+      }
+
+      function toggleExtremeView(viewType, buttonElement) {
+        const buttons = document.querySelectorAll(
+          "#tab5 .view-toggle-buttons:first-of-type .view-toggle-btn"
+        );
+        buttons.forEach((btn) => btn.classList.remove("active"));
+        buttonElement.classList.add("active");
+
+        const districtView = document.getElementById("extreme-district-view");
+        const yearView = document.getElementById("extreme-year-view");
+
+        if (viewType === "district") {
+          districtView.classList.add("active");
+          yearView.classList.remove("active");
+        } else {
+          districtView.classList.remove("active");
+          yearView.classList.add("active");
+          if (
+            !charts.extremeEventsYearChart &&
+            dashboardData &&
+            dashboardData.extreme_events_by_year
+          ) {
+            initializeCharts();
+          }
+        }
+      }
+
+      loadData();
+    </script>
+  </body>
+</html>
