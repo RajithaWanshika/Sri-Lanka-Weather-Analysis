@@ -547,7 +547,7 @@
           <div class="summary-card-title">Hot Months</div>
           <div class="summary-card-value" id="summary3Value">-</div>
           <div class="summary-card-label" id="summary3Label">
-            Districts with temp >25°C
+            Districts with temp >30°C
           </div>
         </div>
         <div class="summary-card summary-4">
@@ -746,8 +746,8 @@
           <div class="info-box">
             <p>
               <strong>Analysis:</strong> This shows temperature distribution
-              analysis with two views with mean temperature above 25°C in a
-              single year
+              analysis based on weekly max temperature data
+              (avg_max_temperature_C) with two views
             </p>
           </div>
           <div class="view-toggle">
@@ -774,7 +774,8 @@
             <div class="info-box" style="margin-top: 20px">
               <p>
                 <strong>Count Analysis:</strong> Shows the number of districts
-                that have mean temperature above 25°C in a single year.
+                that have average max temperature above 30°C based on weekly max
+                temperature data.
               </p>
             </div>
           </div>
@@ -807,10 +808,9 @@
                   <thead>
                     <tr>
                       <th>District</th>
-                      <th>% Months >25°C</th>
-                      <th>% Months <25°C</th>
-                      <th>% Months >30°C</th>
-                      <th>Avg Temp (°C)</th>
+                      <th>% Weeks >30°C</th>
+                      <th>% Weeks <30°C</th>
+                      <th>Avg Max Temp (°C)</th>
                       <th>Min Temp (°C)</th>
                       <th>Max Temp (°C)</th>
                     </tr>
@@ -1273,12 +1273,12 @@
         }
 
         if (!charts.tempCountChart) {
-          const districtsAbove25 = Object.values(
+          const districtsAbove30 = Object.values(
             dashboardData.temp_analysis
-          ).filter((data) => data.percentage_above_25 > 0).length;
-          const districtsBelow25 = Object.values(
+          ).filter((data) => data.percentage_above_30 > 0).length;
+          const districtsBelow30 = Object.values(
             dashboardData.temp_analysis
-          ).filter((data) => data.percentage_below_25 > 0).length;
+          ).filter((data) => data.percentage_below_30 > 0).length;
 
           charts.tempCountChart = new Chart(
             document.getElementById("tempCountChart"),
@@ -1286,12 +1286,12 @@
               type: "doughnut",
               data: {
                 labels: [
-                  "Districts with Temp >25°C",
-                  "Districts with Temp <25°C",
+                  "Districts with Temp >30°C",
+                  "Districts with Temp <30°C",
                 ],
                 datasets: [
                   {
-                    data: [districtsAbove25, districtsBelow25],
+                    data: [districtsAbove30, districtsBelow30],
                     backgroundColor: [
                       "rgba(255, 152, 0, 0.9)",
                       "rgba(33, 150, 243, 0.9)",
@@ -1311,7 +1311,7 @@
                   },
                   title: {
                     display: true,
-                    text: "Count of Districts: Temperature Above/Below 25°C",
+                    text: "Count of Districts: Temperature Above/Below 30°C",
                     font: { size: 16, weight: "bold" },
                   },
                 },
@@ -1322,7 +1322,7 @@
 
         if (!charts.chart4) {
           const tempData = Object.entries(dashboardData.temp_analysis).sort(
-            (a, b) => b[1].percentage_above_25 - a[1].percentage_above_25
+            (a, b) => b[1].percentage_above_30 - a[1].percentage_above_30
           );
 
           charts.chart4 = new Chart(document.getElementById("tempChart"), {
@@ -1331,8 +1331,8 @@
               labels: tempData.map((d) => d[0]),
               datasets: [
                 {
-                  label: "% Months >25°C",
-                  data: tempData.map((d) => d[1].percentage_above_25),
+                  label: "% Weeks >30°C",
+                  data: tempData.map((d) => d[1].percentage_above_30),
                   backgroundColor: "rgba(255, 152, 0, 0.8)",
                   borderColor: "rgba(255, 152, 0, 1)",
                   borderWidth: 2,
@@ -1340,8 +1340,8 @@
                   borderRadius: 5,
                 },
                 {
-                  label: "% Months <25°C",
-                  data: tempData.map((d) => d[1].percentage_below_25),
+                  label: "% Weeks <30°C",
+                  data: tempData.map((d) => d[1].percentage_below_30),
                   backgroundColor: "rgba(33, 150, 243, 0.8)",
                   borderColor: "rgba(33, 150, 243, 1)",
                   borderWidth: 2,
@@ -1349,8 +1349,8 @@
                   borderRadius: 5,
                 },
                 {
-                  label: "Avg Temperature (°C)",
-                  data: tempData.map((d) => d[1].avg_temperature),
+                  label: "Avg Max Temperature (°C)",
+                  data: tempData.map((d) => d[1].avg_max_temperature_C),
                   type: "line",
                   backgroundColor: "rgba(76, 175, 80, 0.2)",
                   borderColor: "rgba(76, 175, 80, 1)",
@@ -1374,7 +1374,7 @@
                 },
                 title: {
                   display: true,
-                  text: "Temperature Distribution by District: Percentage & Average Temperature",
+                  text: "Temperature Distribution by District: Percentage & Average Max Temperature",
                   font: { size: 16, weight: "bold" },
                 },
               },
@@ -1416,19 +1416,18 @@
 
           const table = document.getElementById("tempTable");
           Object.entries(dashboardData.temp_analysis)
-            .sort((a, b) => b[1].percentage_above_25 - a[1].percentage_above_25)
+            .sort((a, b) => b[1].percentage_above_30 - a[1].percentage_above_30)
             .forEach(([district, data]) => {
               const row = table.insertRow();
               row.insertCell(0).textContent = district;
               row.insertCell(1).textContent =
-                data.percentage_above_25.toFixed(1) + "%";
-              row.insertCell(2).textContent =
-                data.percentage_below_25.toFixed(1) + "%";
-              row.insertCell(3).textContent =
                 data.percentage_above_30.toFixed(1) + "%";
-              row.insertCell(4).textContent = data.avg_temperature.toFixed(2);
-              row.insertCell(5).textContent = data.min_temperature.toFixed(2);
-              row.insertCell(6).textContent = data.max_temperature.toFixed(2);
+              row.insertCell(2).textContent =
+                data.percentage_below_30.toFixed(1) + "%";
+              row.insertCell(3).textContent =
+                data.avg_max_temperature_C.toFixed(2);
+              row.insertCell(4).textContent = data.min_temperature.toFixed(2);
+              row.insertCell(5).textContent = data.max_temperature.toFixed(2);
             });
         }
 
@@ -1597,12 +1596,12 @@
         }
 
         const hotDistricts = Object.values(dashboardData.temp_analysis).filter(
-          (data) => data.percentage_above_25 > 0
+          (data) => data.percentage_above_30 > 0
         ).length;
         document.getElementById("summary3Value").textContent = hotDistricts;
         document.getElementById(
           "summary3Label"
-        ).textContent = `Districts with months >25°C`;
+        ).textContent = `Districts with weeks >30°C`;
 
         const totalExtremeDays = Object.values(
           dashboardData.extreme_events
