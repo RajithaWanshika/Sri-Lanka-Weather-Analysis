@@ -33,7 +33,6 @@ echo "Step 3: Stopping and removing existing containers (if any)..."
 cd "$(dirname "$DOCKER_COMPOSE_FILE")"
 sudo docker compose -f "$DOCKER_COMPOSE_FILE" down 2>/dev/null || true
 
-# Force remove containers by name if they still exist (handles cases where docker compose down didn't work)
 CONTAINERS=("namenode" "datanode1" "datanode2" "resourcemanager" "nodemanager1" "nodemanager2")
 for container in "${CONTAINERS[@]}"; do
     if sudo docker ps -a --format '{{.Names}}' | grep -q "^${container}$"; then
@@ -73,7 +72,7 @@ if sudo docker exec namenode bash -c "hdfs dfsadmin -report" 2>/dev/null | grep 
     echo "Datanodes are connected to namenode"
     sudo docker exec namenode bash -c "hdfs dfsadmin -report" 2>/dev/null | head -40
 else
-    echo "⚠ Warning: Datanode connection status unclear. Checking logs..."
+    echo "Warning: Datanode connection status unclear. Checking logs..."
     sudo docker logs datanode1 | tail -10
     sudo docker logs datanode2 | tail -10
 fi

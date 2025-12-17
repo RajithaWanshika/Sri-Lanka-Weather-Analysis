@@ -16,7 +16,6 @@ echo "Step 1: Stopping and removing existing containers (if any)..."
 cd "$(dirname "$DOCKER_COMPOSE_FILE")"
 sudo docker compose -f "$DOCKER_COMPOSE_FILE" down 2>/dev/null || true
 
-# Force remove containers by name if they still exist (handles cases where docker compose down didn't work)
 CONTAINERS=("namenode" "datanode" "resourcemanager" "nodemanager" "spark-master" "spark-worker-1")
 for container in "${CONTAINERS[@]}"; do
     if sudo docker ps -a --format '{{.Names}}' | grep -q "^${container}$"; then
@@ -57,9 +56,9 @@ sleep 15
 echo ""
 echo "Checking if datanode is connected..."
 if sudo docker exec namenode bash -c "hdfs dfsadmin -report" 2>/dev/null | grep -q "datanode"; then
-    echo "✓ Datanode is connected to namenode"
+    echo "Datanode is connected to namenode"
 else
-    echo "⚠ Warning: Datanode connection status unclear. Checking logs..."
+    echo "Warning: Datanode connection status unclear. Checking logs..."
     sudo docker logs datanode | tail -10
 fi
 

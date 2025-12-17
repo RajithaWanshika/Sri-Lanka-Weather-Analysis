@@ -8,7 +8,6 @@ PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 WEATHER_FILE="$PROJECT_ROOT/data/weatherData.csv"
 LOCATION_FILE="$PROJECT_ROOT/data/locationData.csv"
 
-# Check if data files exist
 if [ ! -f "$WEATHER_FILE" ]; then
     echo "ERROR: Weather data file not found at: $WEATHER_FILE"
     exit 1
@@ -94,13 +93,12 @@ sudo docker exec namenode bash -c "hdfs dfs -ls /user/weather/input/location/"
 
 echo ""
 echo "Verifying file existence..."
-# Retry verification up to 3 times with delay
 for i in {1..3}; do
     WEATHER_CHECK=$(sudo docker exec namenode bash -c "hdfs dfs -test -e /user/weather/input/weather/weatherData.csv && echo 'OK' || echo 'MISSING'" 2>/dev/null | tr -d '\r\n')
     LOCATION_CHECK=$(sudo docker exec namenode bash -c "hdfs dfs -test -e /user/weather/input/location/locationData.csv && echo 'OK' || echo 'MISSING'" 2>/dev/null | tr -d '\r\n')
     
     if [ "$WEATHER_CHECK" = "OK" ] && [ "$LOCATION_CHECK" = "OK" ]; then
-        echo "✓ Both files uploaded successfully!"
+        echo "Both files uploaded successfully!"
         echo "  Weather data: OK"
         echo "  Location data: OK"
         echo ""
@@ -116,7 +114,7 @@ for i in {1..3}; do
     fi
 done
 
-echo "✗ Upload verification failed after 3 attempts!"
+echo "Upload verification failed after 3 attempts!"
 echo "  Weather data: $WEATHER_CHECK"
 echo "  Location data: $LOCATION_CHECK"
 echo ""

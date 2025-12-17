@@ -15,10 +15,12 @@ This project leverages a modern big data technology stack for distributed proces
 - **Apache Spark 3.3.1** - In-memory distributed data processing engine
 - **Apache Spark MLlib** - Performing Machine Learning intepretation and predictions
 - **Apache Hive** - Data warehouse infrastructure for SQL-like queries on Hadoop
+- **Scala** - Perform spark anaylsis
 - **Maven** - Build automation and dependency management
 - **Python 3** - Data processing scripts and dashboard server
 - **Google Colabs and Jupyter** - Performing Machine Learning model
 - **HTML** - Data visualization
+- **CSS** - Data visualization styling
 - **Docker & Docker Compose** - Containerization for distributed cluster setup
 - **HDFS** - Hadoop Distributed File System for distributed data storage
 - **JUnit 5** - Unit testing framework
@@ -26,14 +28,14 @@ This project leverages a modern big data technology stack for distributed proces
 
 ## Key Features
 
-### 📊 District-wise Monthly Analysis
+### District-wise Monthly Analysis
 Analyzes precipitation and temperature patterns for each district on a monthly basis.
 
 ![Month-wise Precipitation & Temperature by District](resources/images/Month-wise%20Precipitation%20%26%20Temperature%20by%20District.png)
 
 ![Month-wise Precipitation & Temperature by District - Table View](resources/images/Month-wise%20Precipitation%20%26%20Temperature%20by%20District%20table%20view.png)
 
-### 🌧️ Precipitation Analysis
+### Precipitation Analysis
 Identifies periods and locations with the highest precipitation.
 
 ![Most Precipitous Analysis](resources/images/Most%20precipitous%20analysis.png)
@@ -42,20 +44,20 @@ Identifies periods and locations with the highest precipitation.
 
 ![Most Precipitous Month:Season by District](resources/images/Most%20Precipitous%20Month%3ASeason%20by%20District%20table%20view.png)
 
-### 🌡️ Temperature Distribution
+### Temperature Distribution
 Analyzes temperature patterns across different districts, providing insights into regional climate characteristics and identifying temperate regions.
 
 ![Temperature Distribution Analysis - Graph View](resources/images/Temperature%20Distribution%20Analysis%20graph%20view.png)
 
 ![Temperature Distribution Analysis - District View](resources/images/Temperature%20Distribution%20Analysis%20district%20wise%20view.png)
 
-### 🏙️ Top Temperate Cities
+### Top Temperate Cities
 Identifies cities with the most moderate and comfortable temperature ranges, useful for understanding ideal living conditions and climate zones.
 
-### 🌱 Seasonal Evapotranspiration
+### Seasonal Evapotranspiration
 Analyzes evapotranspiration patterns across different seasons, providing insights into water cycle dynamics and agricultural planning.
 
-### ⚠️ Extreme Weather Events
+### Extreme Weather Events
 Tracks and visualizes extreme weather events, helping identify patterns in severe weather occurrences.
 
 ![Extreme Weather Events](resources/images/Extreme%20Weather%20Events.png)
