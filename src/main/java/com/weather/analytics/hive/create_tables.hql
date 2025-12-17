@@ -3,7 +3,7 @@ USE weather_db;
 
 CREATE EXTERNAL TABLE IF NOT EXISTS weather_data (
     location_id STRING,
-    date STRING,
+    `date` STRING,
     weather_code STRING,
     temperature_2m_max DOUBLE,
     temperature_2m_min DOUBLE,
