@@ -271,15 +271,6 @@ object WeeklyMaxTemperatureAnalysis {
         .option("header", "true")
         .csv(s"${baseOutputPath}/3_overall_weekly_temps")
 
-      println("\n" + "=" * 70)
-      println("WEEKLY MAXIMUM TEMPERATURE ANALYSIS COMPLETE")
-      println("=" * 70)
-      println("Three output tables generated:")
-      println(s"  1. Hottest month per year (global): ${baseOutputPath}/1_hottest_months_summary")
-      println(s"  2. Weekly temps by district: ${baseOutputPath}/2_weekly_temps_by_district")
-      println(s"  3. Overall weekly temps (all districts): ${baseOutputPath}/3_overall_weekly_temps")
-      println("=" * 70 + "\n")
-
       println("TABLE 1: Hottest Month per Year (Across All Districts):")
       println("-" * 70)
       hottestMonthsSummary.show(false)

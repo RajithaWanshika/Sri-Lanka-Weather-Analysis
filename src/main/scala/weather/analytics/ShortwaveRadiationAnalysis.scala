@@ -167,15 +167,6 @@ object ShortwaveRadiationAnalysis {
         .option("header", "true")
         .csv(outputPath)
 
-      println("\n" + "=" * 40)
-      println("SHORTWAVE RADIATION ANALYSIS COMPLETE")
-      println("=" * 40)
-      println(s"Analysis: Percentage of radiation >$RADIATION_THRESHOLD MJ/m² per month per district")
-      println(s"Threshold: $RADIATION_THRESHOLD MJ/m²")
-      println(s"Output: $outputPath")
-      println("=" * 40 + "\n")
-
-      println("Sample Results (Top 10):")
       result.show(10, truncate = false)
 
     } catch {
